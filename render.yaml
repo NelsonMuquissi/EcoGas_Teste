@@ -3,10 +3,12 @@ services:
     name: ecogas-django-admin
     env: python
     plan: free
+    region: oregon  # ✅ Mesma região dos seus outros serviços
+    rootDirectory: django-admin  # ✅ IMPORTANTE: pasta do projeto
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
-      python manage.py migrate
+      python manage.py migrate --noinput
     startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: SECRET_KEY
@@ -17,3 +19,6 @@ services:
         value: ecogas-django-admin.onrender.com
       - key: ECO_GAS_API_URL
         value: https://api-ecogas.onrender.com
+
+    healthCheckPath: /dashboard/
+    autoDeploy: true
