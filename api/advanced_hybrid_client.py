@@ -8,11 +8,19 @@ class AdvancedHybridAPI:
         self.base_url = "https://api-ecogas.onrender.com"
         self.token = None
         self.use_real_api = False
-        self._api_status = "checking"  # checking, online, offline
-        self._registered_users = {}  # Cache de usuários registrados na API
+        self._api_status = "checking"
+        self._registered_users = {}
         self._mock_data = self._load_mock_data()
         self._last_api_check = None
         
+        # Credenciais reais da API
+        self._real_credentials = {
+            "admin": {
+                "email": "admin@ecogas.com",
+                "password": "ecogas@visiontec.2025"
+            }
+        }
+    
     def _load_mock_data(self):
         """Carrega dados mock realistas"""
         return {
@@ -43,16 +51,6 @@ class AdvancedHybridAPI:
                     "category": "gas",
                     "weight": "6kg",
                     "image": "/static/images/gas6kg.jpg"
-                },
-                {
-                    "id": 3,
-                    "name": "Botijão Gás 45kg",
-                    "description": "Gás butano para uso industrial ou restaurantes - Alta capacidade",
-                    "price": 18000,
-                    "stock": random.randint(5, 20),
-                    "category": "gas", 
-                    "weight": "45kg",
-                    "image": "/static/images/gas45kg.jpg"
                 }
             ],
             "orders": [
@@ -66,9 +64,7 @@ class AdvancedHybridAPI:
                     "quantity": 1,
                     "total_amount": 5500,
                     "status": "pending",
-                    "created_at": (datetime.now() - timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S"),
-                    "address": "Rua das Flores, 123 - Luanda, Angola",
-                    "delivery_notes": "Entregar após as 14h"
+                    "created_at": (datetime.now() - timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
                 },
                 {
                     "id": 1002,
@@ -80,37 +76,7 @@ class AdvancedHybridAPI:
                     "quantity": 2, 
                     "total_amount": 6400,
                     "status": "accepted",
-                    "created_at": (datetime.now() - timedelta(hours=5)).strftime("%Y-%m-%d %H:%M:%S"),
-                    "address": "Avenida 4 de Fevereiro, 456 - Luanda, Angola",
-                    "delivery_notes": "Portão azul"
-                },
-                {
-                    "id": 1003,
-                    "customer_name": "Ana Pereira",
-                    "customer_email": "ana.pereira@email.com", 
-                    "customer_phone": "934567890",
-                    "product_name": "Botijão Gás 12kg",
-                    "product_id": 1,
-                    "quantity": 1,
-                    "total_amount": 5500,
-                    "status": "delivered",
-                    "created_at": (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
-                    "address": "Bairro Popular, 789 - Luanda, Angola",
-                    "delivery_notes": "Entregue com sucesso"
-                },
-                {
-                    "id": 1004,
-                    "customer_name": "Carlos Fernandes",
-                    "customer_email": "carlos.fernandes@email.com",
-                    "customer_phone": "945678901",
-                    "product_name": "Botijão Gás 45kg",
-                    "product_id": 3,
-                    "quantity": 1,
-                    "total_amount": 18000,
-                    "status": "on_route",
-                    "created_at": (datetime.now() - timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S"),
-                    "address": "Rua do Comércio, 321 - Luanda, Angola",
-                    "delivery_notes": "Restaurante Esperança"
+                    "created_at": (datetime.now() - timedelta(hours=5)).strftime("%Y-%m-%d %H:%M:%S")
                 }
             ],
             "users": [
@@ -131,24 +97,6 @@ class AdvancedHybridAPI:
                     "phone": "923451111",
                     "created_at": "2025-09-15 14:20:00",
                     "status": "active"
-                },
-                {
-                    "id": 3,
-                    "name": "Sofia Mendes",
-                    "email": "sofia@email.com",
-                    "role": "customer", 
-                    "phone": "934562222",
-                    "created_at": "2025-09-20 09:30:00",
-                    "status": "active"
-                },
-                {
-                    "id": 4,
-                    "name": "António Delivery",
-                    "email": "antonio@ecogas.com", 
-                    "role": "delivery_person",
-                    "phone": "945673333",
-                    "created_at": "2025-09-10 08:15:00",
-                    "status": "active"
                 }
             ],
             "deliveries": [
@@ -161,23 +109,12 @@ class AdvancedHybridAPI:
                     "current_location": "-8.8383, 13.2344",
                     "estimated_time": "30 minutos",
                     "last_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                },
-                {
-                    "id": 2002, 
-                    "order_id": 1004,
-                    "delivery_person": "Maria Entregadora",
-                    "delivery_person_phone": "956784444",
-                    "status": "in_progress",
-                    "current_location": "-8.8156, 13.2304",
-                    "estimated_time": "15 minutos",
-                    "last_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 }
             ]
         }
     
     def _check_api_status(self):
-        """Verifica status da API de forma inteligente"""
-        # Só verifica a cada 30 segundos para não sobrecarregar
+        """Verifica status da API"""
         if (self._last_api_check and 
             (datetime.now() - self._last_api_check).total_seconds() < 30):
             return self._api_status == "online"
@@ -188,90 +125,43 @@ class AdvancedHybridAPI:
             response = requests.get(f"{self.base_url}/products", timeout=5)
             if response.status_code == 200:
                 self._api_status = "online"
-                print("🌐 API real: ONLINE")
                 return True
-        except Exception as e:
-            print(f"🌐 API real: OFFLINE ({e})")
+        except:
             self._api_status = "offline"
         
         return False
     
-    def _create_unique_user(self):
-        """Cria dados de usuário único"""
-        unique_phone = f"9{random.randint(10000000, 99999999)}"
-        return {
-            "name": "Administrador EcoGás",
-            "email": f"admin_{unique_phone}@ecogas.com",
-            "password": "Admin123!",
-            "phone": unique_phone
-        }
-    
-    def _register_via_api(self, user_data):
-        """Registra usuário na API real"""
-        try:
-            response = requests.post(
-                f"{self.base_url}/auth/register", 
-                json=user_data, 
-                timeout=10
-            )
-            
-            if response.status_code == 201:
-                print(f"✅ Usuário registrado na API: {user_data['email']}")
-                return True, user_data
-            else:
-                print(f"❌ Registro falhou: {response.status_code} - {response.text[:100]}")
-        except Exception as e:
-            print(f"❌ Erro no registro: {e}")
-        
-        return False, None
-    
-    def _try_real_login(self, email, password):
-        """Tenta login real na API"""
-        try:
-            response = requests.post(
-                f"{self.base_url}/auth/login",
-                json={"email": email, "password": password},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                self.token = data.get('token')
-                self.use_real_api = True
-                print("🎉 LOGIN REAL BEM-SUCEDIDO!")
-                return True, data
-            else:
-                print(f"🔐 Login real falhou: {response.status_code}")
+    def _try_real_credentials(self):
+        """Tenta fazer login com as credenciais reais"""
+        for role, creds in self._real_credentials.items():
+            try:
+                response = requests.post(
+                    f"{self.base_url}/auth/login",
+                    json={
+                        "email": creds["email"],
+                        "password": creds["password"]
+                    },
+                    timeout=15
+                )
                 
-        except Exception as e:
-            print(f"🔐 Erro no login real: {e}")
+                if response.status_code == 200:
+                    data = response.json()
+                    self.token = data.get('token')
+                    self.use_real_api = True
+                    return True, data
+            except:
+                pass
         
         return False, None
     
     def login(self, email, password):
-        """Sistema de login inteligente híbrido"""
-        print(f"🔐 Tentando login para: {email}")
+        """Sistema de login inteligente"""
+        # Primeiro tenta credenciais reais
+        success, result = self._try_real_credentials()
+        if success:
+            return success, result
         
-        # Verifica status da API
-        api_online = self._check_api_status()
-        
-        # Se API está online, tenta login real primeiro
-        if api_online:
-            success, result = self._try_real_login(email, password)
-            if success:
-                return success, result
-        
-        # Se chegou aqui, usa sistema mock
-        print("🔄 Usando sistema mock (API offline ou login falhou)")
-        
-        # Tenta registrar um usuário de teste na API (para futuros logins reais)
-        if api_online and email not in self._registered_users:
-            test_user = self._create_unique_user()
-            success, registered_user = self._register_via_api(test_user)
-            if success:
-                self._registered_users[test_user['email']] = test_user['password']
-        
-        # Cria resposta mock
+        # Fallback para mock
         mock_user = {
             "user": {
                 "id": random.randint(1000, 9999),
@@ -304,93 +194,64 @@ class AdvancedHybridAPI:
             
             if response.status_code == 200:
                 return True, response.json()
-            else:
-                print(f"❌ Request real falhou ({endpoint}): {response.status_code}")
-                
-        except Exception as e:
-            print(f"❌ Erro request real ({endpoint}): {e}")
+        except:
+            pass
         
         return False, None
     
     def get_admin_stats(self):
-        """Obtém estatísticas - tenta API real primeiro"""
-        print("📊 Buscando estatísticas...")
-        
+        """Obtém estatísticas"""
         success, real_data = self._try_real_request("/admin/stats")
         if success:
-            print("✅ Estatísticas da API real")
             return True, real_data
         
-        # Fallback para mock com dados dinâmicos
-        print("📊 Estatísticas mock (fallback)")
         stats = self._mock_data["stats"].copy()
-        # Atualiza dados para parecerem mais realistas
         stats["orders_today"] = random.randint(8, 20)
         stats["pending_deliveries"] = random.randint(3, 12)
         return True, stats
     
     def get_all_orders(self):
         """Obtém todos os pedidos"""
-        print("📦 Buscando pedidos...")
-        
         success, real_data = self._try_real_request("/admin/orders")
         if success:
-            orders_count = len(real_data.get('orders', []))
-            print(f"✅ {orders_count} pedidos da API real")
             return True, real_data
         
-        # Fallback para mock
-        print("📦 Pedidos mock (fallback)")
         return True, {"orders": self._mock_data.get("orders", [])}
     
     def get_all_users(self):
         """Obtém todos os usuários"""
-        print("👥 Buscando usuários...")
-        
         success, real_data = self._try_real_request("/admin/users")
         if success:
-            users_count = len(real_data.get('users', []))
-            print(f"✅ {users_count} usuários da API real")
             return True, real_data
         
-        # Fallback para mock
-        print("👥 Usuários mock (fallback)")
         return True, {"users": self._mock_data.get("users", [])}
     
     def get_products(self):
         """Obtém produtos"""
-        print("🏪 Buscando produtos...")
+        if self.use_real_api and self.token:
+            success, real_data = self._try_real_request("/products")
+            if success:
+                return True, real_data
         
-        # Produtos é endpoint público, não precisa de token
         if self._check_api_status():
             try:
                 response = requests.get(f"{self.base_url}/products", timeout=10)
                 if response.status_code == 200:
                     products = response.json()
                     if products and len(products) > 0:
-                        print(f"✅ {len(products)} produtos da API real")
                         return True, products
             except:
                 pass
         
-        # Fallback para mock
-        print("🏪 Produtos mock (fallback)")
         return True, self._mock_data.get("products", [])
     
     def get_live_deliveries(self):
         """Obtém entregas em tempo real"""
-        print("🚚 Buscando entregas...")
-        
         success, real_data = self._try_real_request("/admin/deliveries/live")
         if success:
-            deliveries_count = len(real_data.get('deliveries', []))
-            print(f"✅ {deliveries_count} entregas da API real")
             return True, real_data
         
-        # Fallback para mock com dados semi-aleatórios
-        print("🚚 Entregas mock (fallback)")
         deliveries = self._mock_data.get("deliveries", []).copy()
-        # Atualiza timestamps para parecerem mais real
         for delivery in deliveries:
             delivery["last_update"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
@@ -398,14 +259,19 @@ class AdvancedHybridAPI:
     
     def update_order_status(self, order_id, new_status):
         """Atualiza status do pedido"""
-        print(f"🔄 Atualizando pedido {order_id} para: {new_status}")
+        if self.use_real_api and self.token:
+            success, result = self._try_real_request(
+                f"/admin/orders/{order_id}/status", 
+                method='PUT',
+                data={"status": new_status}
+            )
+            if success:
+                return True, result
         
-        # Por enquanto usa mock (quando API estiver 100%, implementa real)
         for order in self._mock_data.get("orders", []):
             if order["id"] == order_id:
                 order["status"] = new_status
                 order["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(f"✅ Pedido {order_id} atualizado para: {new_status}")
                 return True, {"message": "Status atualizado com sucesso"}
         
         return False, {"error": "Pedido não encontrado"}
@@ -415,7 +281,7 @@ class AdvancedHybridAPI:
         return {
             "api_status": self._api_status,
             "using_real_api": self.use_real_api,
-            "registered_users_count": len(self._registered_users),
+            "real_credentials_available": bool(self._real_credentials),
             "last_check": self._last_api_check.isoformat() if self._last_api_check else None
         }
 
