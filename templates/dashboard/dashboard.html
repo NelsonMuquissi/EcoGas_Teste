@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard Principal{% endblock %}
+
+{% block content %}
+<!-- Estatísticas -->
+<div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card bg-primary text-white shadow stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-white text-uppercase mb-1">
+                            Pedidos Hoje
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold">
+                            {{ stats.orders_today|default:"0" }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card bg-success text-white shadow stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-white text-uppercase mb-1">
+                            Entregas Pendentes
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold">
+                            {{ stats.pending_deliveries|default:"0" }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-truck fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card bg-warning text-white shadow stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-white text-uppercase mb-1">
+                            Clientes Ativos
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold">
+                            {{ stats.active_customers|default:"0" }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card bg-info text-white shadow stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-white text-uppercase mb-1">
+                            Receita Mensal
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold">
+                            Akz {{ stats.monthly_revenue|default:"0" }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Últimos Pedidos -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-shopping-cart me-2"></i>Últimos Pedidos
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Produto</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in stats.recent_orders|default:"" %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.customer_name }}</td>
+                                <td>{{ order.product_name }}</td>
+                                <td>Akz {{ order.total_amount }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if order.status == 'pending' %}bg-warning
+                                        {% elif order.status == 'accepted' %}bg-info
+                                        {% elif order.status == 'delivered' %}bg-success
+                                        {% elif order.status == 'cancelled' %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ order.status }}
+                                    </span>
+                                </td>
+                                <td>{{ order.created_at }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="fas fa-shopping-cart fa-2x mb-2"></i><br>
+                                    Nenhum pedido recente
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações do Sistema -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-info-circle me-2"></i>Informações do Sistema
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Modo Desenvolvimento
+                    </h6>
+                    <small class="mb-0">
+                        Sistema utilizando dados de demonstração. 
+                        A API real está em processo de correção.
+                    </small>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-database me-1"></i>
+                        <strong>Dados:</strong> Mock/Desenvolvimento
+                    </small><br>
+                    <small class="text-muted">
+                        <i class="fas fa-code me-1"></i>
+                        <strong>Status API:</strong> Em correção
+                    </small><br>
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        <strong>Última verificação:</strong> Agora
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

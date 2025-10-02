@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedidos{% endblock %}
+{% block page_title %}Gestão de Pedidos{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-shopping-cart me-2"></i>Todos os Pedidos
+        </h6>
+        <span class="badge bg-primary">{{ orders|length }} pedidos</span>
+    </div>
+    <div class="card-body">
+        {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Contacto</th>
+                        <th>Produto</th>
+                        <th>Qtd</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Data</th>
+                        <th>Endereço</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td><strong>#{{ order.id }}</strong></td>
+                        <td>
+                            <div>{{ order.customer_name }}</div>
+                            <small class="text-muted">{{ order.customer_email }}</small>
+                        </td>
+                        <td>{{ order.customer_phone }}</td>
+                        <td>{{ order.product_name }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td><strong>Akz {{ order.total_amount }}</strong></td>
+                        <td>
+                            <span class="badge 
+                                {% if order.status == 'pending' %}bg-warning
+                                {% elif order.status == 'accepted' %}bg-info
+                                {% elif order.status == 'delivered' %}bg-success
+                                {% elif order.status == 'cancelled' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td>{{ order.created_at }}</td>
+                        <td>
+                            <small class="text-muted">{{ order.address|truncatechars:30 }}</small>
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'update_order_status' order.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pendente</option>
+                                    <option value="accepted" {% if order.status == 'accepted' %}selected{% endif %}>Aceito</option>
+                                    <option value="on_route" {% if order.status == 'on_route' %}selected{% endif %}>Em Rota</option>
+                                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Entregue</option>
+                                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelado</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Nenhum pedido encontrado.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
