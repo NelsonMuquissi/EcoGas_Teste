@@ -2,9 +2,16 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # URLs ORIGINAIS (com problema)
     path('', views.dashboard, name='dashboard'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('login/', views.login_view, name='login'),
+    
+    # URLs TEMPORÁRIAS (funcionais)
+    path('simple/', views.dashboard_simple, name='dashboard_simple'),
+    path('simple-login/', views.login_view_simple, name='login_simple'),
+    
+    # Resto das URLs...
     path('logout/', views.logout_view, name='logout'),
     path('orders/', views.orders_view, name='orders'),
     path('users/', views.users_view, name='users'),

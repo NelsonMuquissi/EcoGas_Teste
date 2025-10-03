@@ -207,3 +207,88 @@ def system_status_view(request):
         'active_tab': 'status'
     }
     return render(request, 'dashboard/system_status.html', context)
+
+
+def login_view_simple(request):
+    """Sistema de login SIMPLIFICADO sem User.objects"""
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        print(f"🔐 Tentando autenticação: {email}")
+        
+        # Autenticação real na API
+        success, result = advanced_hybrid_api.login(email, password)
+        
+        if success:
+            # Login SIMPLES sem User.objects - usa sessão apenas
+            request.session['user_authenticated'] = True
+            request.session['user_data'] = result.get('user', {})
+            request.session['auth_token'] = result.get('token', '')
+            request.session.modified = True
+            
+            # Mensagem de sucesso
+            messages.success(request, '🎉 Login realizado com sucesso!')
+            messages.info(request, 'Conectado à API EcoGás em tempo real')
+            
+            return redirect('dashboard_simple')
+        else:
+            error_msg = result.get('error', 'Credenciais inválidas')
+            messages.error(request, f'❌ Falha na autenticação: {error_msg}')
+    
+    return render(request, 'dashboard/login.html')
+
+def session_login_required(view_func):
+    """Decorator personalizado que verifica sessão em vez de User auth"""
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('user_authenticated'):
+            return redirect('login_simple')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+def dashboard_simple(request):
+    """Dashboard SIMPLES sem @login_required"""
+    if not request.session.get('user_authenticated'):
+        return redirect('login_simple')
+    
+    # Resto do seu código igual...
+    success, stats_data = advanced_hybrid_api.get_admin_stats()
+    success_orders, orders_data = advanced_hybrid_api.get_all_orders()
+    system_status = advanced_hybrid_api.get_system_status()
+    
+    recent_orders = []
+    if success_orders:
+        if isinstance(orders_data, list):
+            recent_orders = orders_data[:5]
+        elif isinstance(orders_data, dict) and 'orders' in orders_data:
+            recent_orders = orders_data.get('orders', [])[:5]
+    
+    context = {
+        'page_title': 'Dashboard EcoGás',
+        'stats': stats_data if success else {},
+        'recent_orders': recent_orders,
+        'system_status': system_status,
+        'active_tab': 'dashboard'
+    }
+    return render(request, 'dashboard/dashboard.html', context)
+
+@session_login_required
+def orders_view_simple(request):
+    """Gestão de pedidos - versão simples"""
+    success, orders_data = advanced_hybrid_api.get_all_orders()
+    system_status = advanced_hybrid_api.get_system_status()
+    
+    orders = []
+    if success:
+        if isinstance(orders_data, list):
+            orders = orders_data
+        elif isinstance(orders_data, dict) and 'orders' in orders_data:
+            orders = orders_data.get('orders', [])
+    
+    context = {
+        'page_title': 'Gestão de Pedidos',
+        'orders': orders,
+        'system_status': system_status,
+        'active_tab': 'orders'
+    }
+    return render(request, 'dashboard/orders.html', context)
