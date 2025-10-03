@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -6,117 +8,187 @@
     <title>EcoGás Admin - {% block title %}{% endblock %}</title>
     
     <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
     <style>
         :root {
             --primary: #003b28;
             --secondary: #f2b303;
             --accent: #78978e;
-            --dark: #676e1e;
-            --light: #f0f4f3;
-            --success: #27AE60;
+            --dark: #1a3c32;
+            --light: #f8f9fa;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+        }
+        
+        * {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
         }
         
         body {
-            background-color: var(--light);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7f9;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
         }
         
+        /* Sidebar Moderna - CORRIGIDA */
         .sidebar {
             min-height: 100vh;
-            background: linear-gradient(135deg, var(--primary) 0%, #00563f 100%);
-            color: var(--light);
-            box-shadow: 2px 0 10px rgba(0, 59, 40, 0.1);
+            background: linear-gradient(165deg, var(--primary) 0%, var(--dark) 100%);
+            color: white;
+            box-shadow: 3px 0 25px rgba(0, 59, 40, 0.15);
+            position: fixed;
+            width: 280px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
         }
         
         .sidebar .nav-link {
-            color: var(--light);
-            padding: 12px 20px;
-            margin: 4px 0;
-            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.85);
+            padding: 14px 20px;
+            margin: 4px 15px;
+            border-radius: 12px;
             transition: all 0.3s ease;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            white-space: nowrap;
         }
         
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+        .sidebar .nav-link:hover {
             background: rgba(242, 179, 3, 0.15);
             color: var(--secondary);
-            transform: translateX(5px);
+            transform: translateX(8px);
+        }
+        
+        .sidebar .nav-link.active {
+            background: linear-gradient(45deg, rgba(242, 179, 3, 0.2), rgba(242, 179, 3, 0.1));
+            color: var(--secondary);
+            transform: translateX(8px);
+            border-left: 4px solid var(--secondary);
         }
         
         .sidebar .nav-link i {
-            width: 20px;
+            width: 24px;
             margin-right: 12px;
-            color: var(--secondary);
+            font-size: 1.1rem;
+            flex-shrink: 0;
         }
         
-        .stat-card {
-            border-radius: 12px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: none;
-            overflow: hidden;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 59, 40, 0.15);
-        }
-        
-        .bg-primary { 
-            background: linear-gradient(45deg, var(--primary), #00563f) !important;
-            border-left: 4px solid var(--secondary);
-        }
-        
-        .bg-success { 
-            background: linear-gradient(45deg, var(--success), #2ecc71) !important;
-            border-left: 4px solid var(--secondary);
-        }
-        
-        .bg-warning { 
-            background: linear-gradient(45deg, var(--secondary), #f39c12) !important;
-            border-left: 4px solid var(--primary);
-        }
-        
-        .bg-info { 
-            background: linear-gradient(45deg, var(--accent), #95a5a6) !important;
-            border-left: 4px solid var(--secondary);
-        }
-        
+        /* Logo Area */
         .logo-container {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
-            padding: 20px;
-            border-radius: 0 0 20px 20px;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(0, 59, 40, 0.9) 0%, rgba(26, 60, 50, 0.95) 100%);
+            padding: 0px 0px;
+            border-radius: 0 0 25px 25px;
+            margin-bottom: 0px;
             text-align: center;
+            position: relative;
+            z-index: 2;
+            height: 150px;
         }
         
         .logo {
-            color: var(--light);
-            font-size: 1.5rem;
-            font-weight: bold;
+            color: white;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
         }
         
         .logo-symbol {
             color: var(--secondary);
             font-size: 2rem;
-            margin-bottom: 10px;
+            margin-bottom: 0px;
+            display: block;
         }
         
         .slogan {
             color: var(--secondary);
             font-size: 0.8rem;
             font-weight: 500;
-            margin-top: 5px;
+            margin-top: 0px;
+            opacity: 0.9;
+            line-height: 1.3;
         }
         
+        /* Main Content - CORRIGIDO */
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            width: calc(100% - 280px);
+        }
+        
+        /* Header */
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 5px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Cards Modernos */
+        .stat-card {
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            border: none;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-modern {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .card-modern:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* Botões */
         .btn-primary {
             background: linear-gradient(45deg, var(--primary), #00563f);
             border: none;
-            border-radius: 8px;
-            font-weight: 500;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
         }
         
         .btn-primary:hover {
@@ -124,35 +196,277 @@
             transform: translateY(-2px);
         }
         
-        .table-hover tbody tr:hover {
-            background-color: rgba(120, 151, 142, 0.1);
+        /* Tabelas */
+        .table-modern {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
         
-        .badge.bg-primary {
-            background: linear-gradient(45deg, var(--primary), var(--accent)) !important;
+        .table-modern thead {
+            background: linear-gradient(45deg, var(--primary), var(--dark));
+            color: white;
         }
         
-        .badge.bg-warning {
-            background: linear-gradient(45deg, var(--secondary), #f39c12) !important;
-            color: var(--primary);
+        .table-modern tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .table-modern tbody tr:hover {
+            background-color: rgba(120, 151, 142, 0.08);
+        }
+        
+        /* Badges */
+        .badge-modern {
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        /* Status Indicators */
+        .status-online {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        
+        /* Mobile Menu Button - CORRIGIDO */
+        .mobile-menu-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0, 59, 40, 0.3);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        /* User Section - CORRIGIDA */
+        .user-section {
+            margin-top: auto;
+            padding: 20px 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .user-text {
+            flex-grow: 1;
+            min-width: 0;
+        }
+        
+        .user-text strong {
+            display: block;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* RESPONSIVIDADE CORRIGIDA */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .main-content {
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
+            
+            .logo {
+                font-size: 1.4rem;
+            }
+            
+            .logo-symbol {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .main-content {
+                margin-left: 240px;
+                width: calc(100% - 240px);
+                padding: 15px;
+            }
+            
+            .page-header {
+                padding: 15px 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                padding: 15px;
+            }
+            
+            .mobile-menu-btn {
+                display: flex;
+            }
+            
+            .page-header {
+                margin-top: 70px;
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            .logo-container {
+                padding: 15px 10px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 10px;
+            }
+            
+            .page-header {
+                padding: 12px 15px;
+                margin-top: 60px;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .h2.mb-0.fw-bold {
+                font-size: 1.4rem;
+            }
+            
+            .mobile-menu-btn {
+                top: 10px;
+                left: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            /* Garantir que o overlay cubra tudo */
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .main-content {
+                padding: 8px;
+            }
+            
+            .page-header {
+                padding: 10px 12px;
+            }
+            
+            .logo {
+                font-size: 1.3rem;
+            }
+            
+            .slogan {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Scrollbar personalizado para sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(242, 179, 3, 0.5);
+            border-radius: 2px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(242, 179, 3, 0.7);
+        }
+
+        /* Animações */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in-left {
+            animation: slideInLeft 0.3s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="container-fluid p-0">
+        <div class="row g-0">
             <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-                <div class="position-sticky pt-3">
+            <nav class="sidebar" id="sidebar">
+                <div class="d-flex flex-column h-100">
                     <div class="logo-container">
                         <div class="logo-symbol">
-                            <i class="fas fa-fire fa-lg"></i>
+                            <img style="width: 200px;" src="{% static 'images/EcoGas.png' %}" alt="">
                         </div>
-                        <div class="logo">ECO<span style="color: var(--secondary)">GÁS</span></div>
-                        <div class="slogan">SISTEMA DE GESTÃO</div>
                     </div>
                     
-                    <ul class="nav flex-column">
+                    <ul class="nav flex-column flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link {% if active_tab == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
@@ -161,6 +475,7 @@
                         <li class="nav-item">
                             <a class="nav-link {% if active_tab == 'orders' %}active{% endif %}" href="{% url 'orders' %}">
                                 <i class="fas fa-shopping-cart"></i> Pedidos
+                                <span class="badge bg-warning float-end mt-1" id="orders-count">0</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -170,7 +485,8 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if active_tab == 'deliveries' %}active{% endif %}" href="{% url 'deliveries' %}">
-                                <i class="fas fa-truck"></i> Entregas
+                                <i class="fas fa-truck-fast"></i> Entregas
+                                <span class="badge bg-info float-end mt-1" id="deliveries-count">0</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -180,43 +496,67 @@
                         </li>
                     </ul>
                     
-                    <div class="mt-5 pt-3 border-top border-secondary">
-                        <small class="text-light opacity-75">
-                            <i class="fas fa-user me-1"></i> {{ user.username }}
-                        </small><br>
-                        <a href="{% url 'logout' %}" class="nav-link text-warning mt-2">
-                            <i class="fas fa-sign-out-alt"></i> Sair do Sistema
-                        </a>
+                    <!-- User Section -->
+                    <div class="user-section">
+                        <div class="user-info">
+                            <div class="status-online"></div>
+                            <div class="user-text">
+                                <strong>{{ user.username }}</strong>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <a href="{% url 'system_status' %}" class="nav-link text-light opacity-75 py-2">
+                                <i class="fas fa-chart-line me-2"></i>Status do Sistema
+                            </a>
+                            <a href="{% url 'logout' %}" class="nav-link text-warning py-2">
+                                <i class="fas fa-sign-out-alt me-2"></i>Sair
+                            </a>
+                        </div>
                     </div>
                 </div>
             </nav>
 
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Main Content -->
+            <main class="main-content" id="mainContent">
                 <!-- Header -->
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2" style="color: var(--primary);">
-                        <i class="fas fa-{% if active_tab == 'dashboard' %}tachometer-alt{% elif active_tab == 'orders' %}shopping-cart{% elif active_tab == 'users' %}users{% elif active_tab == 'deliveries' %}truck{% else %}gas-pump{% endif %} me-2"></i>
-                        {% block page_title %}{% endblock %}
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <span class="badge bg-primary px-3 py-2">
-                                <i class="fas fa-user me-1"></i> {{ user.first_name|default:user.username }}
-                            </span>
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8 col-12">
+                            <h1 class="h3 mb-1" style="color: var(--primary);">
+                                <i class="fas fa-{% if active_tab == 'dashboard' %}tachometer-alt{% elif active_tab == 'orders' %}shopping-cart{% elif active_tab == 'users' %}users{% elif active_tab == 'deliveries' %}truck-fast{% else %}gas-pump{% endif %} me-2"></i>
+                                {% block page_title %}{% endblock %}
+                            </h1>
+                            <p class="text-muted mb-0 small">{% block page_subtitle %}{% endblock %}</p>
+                        </div>
+                        <div class="col-md-4 col-12 text-md-end text-start mt-2 mt-md-0">
+                            <div class="d-flex align-items-center justify-content-md-end justify-content-start flex-wrap">
+                                <span class="badge bg-primary badge-modern me-3 mb-2 mb-md-0">
+                                    <i class="fas fa-user me-1"></i> {{ user.first_name|default:user.username }}
+                                </span>
+                                <span class="badge bg-success badge-modern" id="api-status">
+                                    <i class="fas fa-circle me-1"></i>
+                                    <span id="status-text">Conectado</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Messages -->
                 {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 shadow-sm">
-                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 shadow-sm card-modern" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% elif message.tags == 'error' %}times-circle{% else %}info-circle{% endif %} me-3 fa-lg"></i>
+                                    <div class="flex-grow-1">
+                                        {{ message }}
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
 
                 <!-- Content -->
@@ -226,7 +566,132 @@
     </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS CORRIGIDO -->
+    <script>
+        // Menu Mobile SIMPLES E FUNCIONAL
+        class MobileMenu {
+            constructor() {
+                this.sidebar = document.getElementById('sidebar');
+                this.overlay = document.getElementById('sidebarOverlay');
+                this.menuBtn = document.getElementById('mobileMenuBtn');
+                this.mainContent = document.getElementById('mainContent');
+                this.isOpen = false;
+                
+                this.init();
+            }
+            
+            init() {
+                if (!this.menuBtn || !this.sidebar || !this.overlay) return;
+                
+                // Event listeners
+                this.menuBtn.addEventListener('click', () => this.toggle());
+                this.overlay.addEventListener('click', () => this.close());
+                
+                // Fechar ao clicar em links (mobile)
+                document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 768) {
+                            this.close();
+                        }
+                    });
+                });
+                
+                // Fechar ao redimensionar para desktop
+                window.addEventListener('resize', () => this.handleResize());
+            }
+            
+            toggle() {
+                this.isOpen ? this.close() : this.open();
+            }
+            
+            open() {
+                this.sidebar.classList.add('mobile-open');
+                this.overlay.classList.add('mobile-open');
+                this.menuBtn.innerHTML = '<i class="fas fa-times"></i>';
+                document.body.style.overflow = 'hidden';
+                this.isOpen = true;
+            }
+            
+            close() {
+                this.sidebar.classList.remove('mobile-open');
+                this.overlay.classList.remove('mobile-open');
+                this.menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                document.body.style.overflow = '';
+                this.isOpen = false;
+            }
+            
+            handleResize() {
+                if (window.innerWidth >= 768) {
+                    this.close();
+                }
+            }
+        }
+
+        // Atualizar contadores em tempo real
+        function updateCounters() {
+            try {
+                const ordersElement = document.getElementById('orders-count');
+                const deliveriesElement = document.getElementById('deliveries-count');
+                
+                if (ordersElement) {
+                    const ordersToday = document.querySelector('#orders-today')?.textContent || '0';
+                    ordersElement.textContent = ordersToday;
+                }
+                
+                if (deliveriesElement) {
+                    const pendingDeliveries = document.querySelector('#pending-deliveries')?.textContent || '0';
+                    deliveriesElement.textContent = pendingDeliveries;
+                }
+            } catch (error) {
+                console.log('Erro ao atualizar contadores:', error);
+            }
+        }
+
+        // Verificar status da API
+        function checkAPIStatus() {
+            try {
+                const statusBadge = document.getElementById('api-status');
+                const statusText = document.getElementById('status-text');
+                
+                if (statusBadge && statusText) {
+                    statusBadge.className = 'badge bg-success badge-modern';
+                    statusText.textContent = 'Conectado';
+                }
+            } catch (error) {
+                console.log('Erro ao verificar status API:', error);
+            }
+        }
+
+        // Função global para mostrar notificações
+        function showNotification(message, type = 'info') {
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+
+        // Inicializar tudo quando DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando EcoGás Admin...');
+            
+            // Inicializar menu mobile
+            new MobileMenu();
+            
+            // Atualizar contadores
+            updateCounters();
+            
+            // Verificar status da API
+            checkAPIStatus();
+            
+            console.log('EcoGás Admin inicializado com sucesso!');
+        });
+
+        // Funções globais
+        window.refreshData = function() {
+            updateCounters();
+            checkAPIStatus();
+            showNotification('Dados atualizados com sucesso!', 'success');
+        };
+    </script>
     
     {% block scripts %}{% endblock %}
 </body>

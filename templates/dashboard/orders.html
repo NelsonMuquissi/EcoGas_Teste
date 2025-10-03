@@ -2,22 +2,107 @@
 
 {% block title %}Pedidos{% endblock %}
 {% block page_title %}Gestão de Pedidos{% endblock %}
+{% block page_subtitle %}Gerencie todos os pedidos da plataforma{% endblock %}
 
 {% block content %}
-<div class="card shadow">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h6 class="m-0 font-weight-bold text-primary">
-            <i class="fas fa-shopping-cart me-2"></i>Todos os Pedidos
-        </h6>
-        <span class="badge bg-primary">{{ orders|length }} pedidos</span>
-    </div>
+<!-- Filtros e Busca -->
+<div class="card card-modern mb-4">
     <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" placeholder="Buscar pedido, cliente..." id="searchInput">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="statusFilter">
+                    <option value="">Todos os status</option>
+                    <option value="pending">Pendente</option>
+                    <option value="accepted">Aceito</option>
+                    <option value="on_route">Em Rota</option>
+                    <option value="delivered">Entregue</option>
+                    <option value="cancelled">Cancelado</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="date" class="form-control" id="dateFilter">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" onclick="applyFilters()">
+                    <i class="fas fa-filter me-1"></i>Filtrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas Rápidas -->
+<div class="row mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-modern text-center">
+            <div class="card-body py-3">
+                <div class="text-primary fw-bold fs-4">{{ orders|length }}</div>
+                <small class="text-muted">Total</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-modern text-center">
+            <div class="card-body py-3">
+                <div class="text-warning fw-bold fs-4" id="pendingCount">0</div>
+                <small class="text-muted">Pendentes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-modern text-center">
+            <div class="card-body py-3">
+                <div class="text-info fw-bold fs-4" id="acceptedCount">0</div>
+                <small class="text-muted">Aceitos</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-modern text-center">
+            <div class="card-body py-3">
+                <div class="text-primary fw-bold fs-4" id="onRouteCount">0</div>
+                <small class="text-muted">Em Rota</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-modern text-center">
+            <div class="card-body py-3">
+                <div class="text-success fw-bold fs-4" id="deliveredCount">0</div>
+                <small class="text-muted">Entregues</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-modern text-center">
+            <div class="card-body py-3">
+                <div class="text-danger fw-bold fs-4" id="cancelledCount">0</div>
+                <small class="text-muted">Cancelados</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Pedidos -->
+<div class="card card-modern">
+    <div class="card-header bg-white border-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0 text-primary">
+                <i class="fas fa-shopping-cart me-2"></i>Todos os Pedidos
+            </h5>
+            <span class="badge bg-primary badge-modern">{{ orders|length }} pedidos</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
         {% if orders %}
         <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-dark">
+            <table class="table table-modern table-hover mb-0" id="ordersTable">
+                <thead>
                     <tr>
-                        <th>ID</th>
+                        <th class="ps-4">ID</th>
                         <th>Cliente</th>
                         <th>Contacto</th>
                         <th>Produto</th>
@@ -25,40 +110,49 @@
                         <th>Total</th>
                         <th>Status</th>
                         <th>Data</th>
-                        <th>Endereço</th>
-                        <th>Ações</th>
+                        <th class="text-end pe-4">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for order in orders %}
-                    <tr>
-                        <td><strong>#{{ order.id }}</strong></td>
-                        <td>
-                            <div>{{ order.customer_name }}</div>
-                            <small class="text-muted">{{ order.customer_email }}</small>
-                        </td>
-                        <td>{{ order.customer_phone }}</td>
-                        <td>{{ order.product_name }}</td>
-                        <td>{{ order.quantity }}</td>
-                        <td><strong>Akz {{ order.total_amount }}</strong></td>
-                        <td>
-                            <span class="badge 
-                                {% if order.status == 'pending' %}bg-warning
-                                {% elif order.status == 'accepted' %}bg-info
-                                {% elif order.status == 'delivered' %}bg-success
-                                {% elif order.status == 'cancelled' %}bg-danger
-                                {% else %}bg-secondary{% endif %}">
-                                {{ order.status }}
-                            </span>
-                        </td>
-                        <td>{{ order.created_at }}</td>
-                        <td>
-                            <small class="text-muted">{{ order.address|truncatechars:30 }}</small>
+                    <tr class="order-row" data-status="{{ order.status }}">
+                        <td class="ps-4">
+                            <div class="fw-bold text-primary">#{{ order.id }}</div>
+                            <small class="text-muted">{{ order.created_at|date:"d/m H:i" }}</small>
                         </td>
                         <td>
-                            <form method="post" action="{% url 'update_order_status' order.id %}" class="d-inline">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-user text-muted"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ order.customer_name }}</div>
+                                    <small class="text-muted">{{ order.customer_email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-nowrap">
+                                <i class="fas fa-phone text-muted me-1"></i>
+                                {{ order.customer_phone }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ order.product_name }}</div>
+                            {% if order.product_description %}
+                            <small class="text-muted">{{ order.product_description|truncatechars:30 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">{{ order.quantity }}</span>
+                        </td>
+                        <td class="fw-bold text-success">Akz {{ order.total_amount }}</td>
+                        <td>
+                            <form method="post" action="{% url 'update_order_status' order.id %}" class="status-form">
                                 {% csrf_token %}
-                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <select name="status" class="form-select status-select" 
+                                        data-order-id="{{ order.id }}" 
+                                        onchange="updateOrderStatus(this)">
                                     <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pendente</option>
                                     <option value="accepted" {% if order.status == 'accepted' %}selected{% endif %}>Aceito</option>
                                     <option value="on_route" {% if order.status == 'on_route' %}selected{% endif %}>Em Rota</option>
@@ -67,6 +161,19 @@
                                 </select>
                             </form>
                         </td>
+                        <td>
+                            <small class="text-muted">{{ order.created_at|date:"d/m/Y H:i" }}</small>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="viewOrderDetails('{{ order.id }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-info" onclick="contactCustomer('{{ order.customer_phone }}')">
+                                    <i class="fas fa-phone"></i>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -74,10 +181,134 @@
         </div>
         {% else %}
         <div class="text-center py-5">
-            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-            <p class="text-muted">Nenhum pedido encontrado.</p>
+            <div class="mb-3">
+                <i class="fas fa-shopping-cart fa-3x text-muted opacity-50"></i>
+            </div>
+            <h5 class="text-muted">Nenhum pedido encontrado</h5>
+            <p class="text-muted mb-0">Todos os pedidos aparecerão aqui automaticamente</p>
         </div>
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Contar pedidos por status
+    function countOrdersByStatus() {
+        const pending = document.querySelectorAll('.order-row[data-status="pending"]').length;
+        const accepted = document.querySelectorAll('.order-row[data-status="accepted"]').length;
+        const onRoute = document.querySelectorAll('.order-row[data-status="on_route"]').length;
+        const delivered = document.querySelectorAll('.order-row[data-status="delivered"]').length;
+        const cancelled = document.querySelectorAll('.order-row[data-status="cancelled"]').length;
+        
+        document.getElementById('pendingCount').textContent = pending;
+        document.getElementById('acceptedCount').textContent = accepted;
+        document.getElementById('onRouteCount').textContent = onRoute;
+        document.getElementById('deliveredCount').textContent = delivered;
+        document.getElementById('cancelledCount').textContent = cancelled;
+    }
+    
+    // Atualizar status do pedido
+    function updateOrderStatus(selectElement) {
+        const orderId = selectElement.getAttribute('data-order-id');
+        const newStatus = selectElement.value;
+        
+        // Mostrar loading
+        const originalText = selectElement.innerHTML;
+        selectElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        selectElement.disabled = true;
+        
+        // Enviar requisição
+        fetch(`/api/update-order-status/${orderId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `status=${newStatus}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Atualizar visualmente
+                const row = selectElement.closest('.order-row');
+                row.setAttribute('data-status', newStatus);
+                countOrdersByStatus();
+                
+                // Mostrar mensagem de sucesso
+                showAlert('Status atualizado com sucesso!', 'success');
+            } else {
+                showAlert('Erro ao atualizar status: ' + data.error, 'error');
+                selectElement.value = row.getAttribute('data-status'); // Reverter
+            }
+        })
+        .catch(error => {
+            showAlert('Erro de conexão', 'error');
+            selectElement.value = row.getAttribute('data-status'); // Reverter
+        })
+        .finally(() => {
+            selectElement.innerHTML = originalText;
+            selectElement.disabled = false;
+        });
+    }
+    
+    // Filtrar pedidos
+    function applyFilters() {
+        const searchText = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const dateFilter = document.getElementById('dateFilter').value;
+        
+        const rows = document.querySelectorAll('.order-row');
+        
+        rows.forEach(row => {
+            const orderId = row.querySelector('.fw-bold').textContent.toLowerCase();
+            const customerName = row.querySelector('.fw-semibold').textContent.toLowerCase();
+            const status = row.getAttribute('data-status');
+            const orderDate = row.querySelector('td:nth-child(8) small').textContent;
+            
+            let show = true;
+            
+            // Filtro de busca
+            if (searchText && !orderId.includes(searchText) && !customerName.includes(searchText)) {
+                show = false;
+            }
+            
+            // Filtro de status
+            if (statusFilter && status !== statusFilter) {
+                show = false;
+            }
+            
+            // Filtro de data
+            if (dateFilter) {
+                // Implementar lógica de filtro por data se necessário
+            }
+            
+            row.style.display = show ? '' : 'none';
+        });
+    }
+    
+    // Funções auxiliares
+    function viewOrderDetails(orderId) {
+        alert(`Detalhes do pedido ${orderId}\n\nEsta funcionalidade será implementada em breve.`);
+    }
+    
+    function contactCustomer(phone) {
+        window.open(`tel:${phone}`, '_self');
+    }
+    
+    function showAlert(message, type) {
+        // Implementar sistema de notificações
+        console.log(`${type.toUpperCase()}: ${message}`);
+    }
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        countOrdersByStatus();
+        
+        // Busca em tempo real
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    });
+</script>
 {% endblock %}

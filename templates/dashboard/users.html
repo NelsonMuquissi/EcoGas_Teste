@@ -2,53 +2,198 @@
 
 {% block title %}Usuários{% endblock %}
 {% block page_title %}Gestão de Usuários{% endblock %}
+{% block page_subtitle %}Gerencie todos os usuários da plataforma{% endblock %}
 
 {% block content %}
-<div class="card shadow">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h6 class="m-0 font-weight-bold text-primary">
-            <i class="fas fa-users me-2"></i>Todos os Usuários
-        </h6>
-        <span class="badge bg-primary">{{ users|length }} usuários</span>
+<!-- Estatísticas de Usuários -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card text-white bg-primary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-white text-uppercase mb-1">
+                            Total de Usuários
+                        </div>
+                        <div class="h2 mb-0 fw-bold">{{ users|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card text-white bg-success">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-white text-uppercase mb-1">
+                            Administradores
+                        </div>
+                        <div class="h2 mb-0 fw-bold" id="adminCount">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-crown fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card text-white bg-info">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-white text-uppercase mb-1">
+                            Clientes
+                        </div>
+                        <div class="h2 mb-0 fw-bold" id="customerCount">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card text-white bg-warning">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-white text-uppercase mb-1">
+                            Entregadores
+                        </div>
+                        <div class="h2 mb-0 fw-bold" id="deliveryCount">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-truck fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card card-modern mb-4">
     <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Buscar por nome, email..." id="userSearch">
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="roleFilter">
+                    <option value="">Todos os tipos</option>
+                    <option value="ADMIN">Administrador</option>
+                    <option value="CUSTOMER">Cliente</option>
+                    <option value="DELIVERY_PERSON">Entregador</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" onclick="filterUsers()">
+                    <i class="fas fa-filter me-1"></i>Filtrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Usuários -->
+<div class="card card-modern">
+    <div class="card-header bg-white border-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0 text-primary">
+                <i class="fas fa-users me-2"></i>Todos os Usuários
+            </h5>
+            <span class="badge bg-primary badge-modern">{{ users|length }} usuários</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
         {% if users %}
         <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-dark">
+            <table class="table table-modern table-hover mb-0" id="usersTable">
+                <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>Email</th>
-                        <th>Telefone</th>
-                        <th>Role</th>
+                        <th class="ps-4">Usuário</th>
+                        <th>Contacto</th>
+                        <th>Tipo</th>
                         <th>Data Registo</th>
                         <th>Status</th>
+                        <th class="text-end pe-4">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in users %}
-                    <tr>
-                        <td><small class="text-muted">#{{ user.id }}</small></td>
+                    <tr class="user-row" data-role="{{ user.role }}">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-lg bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center text-white fw-bold">
+                                    {{ user.name|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ user.name }}</div>
+                                    <small class="text-muted">{{ user.email }}</small>
+                                    <div>
+                                        <small class="text-muted">ID: {{ user.id|slice:":8" }}...</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
                         <td>
-                            <strong>{{ user.name }}</strong>
-                            {% if user.role == 'admin' %}
-                            <i class="fas fa-crown text-warning ms-1" title="Administrador"></i>
+                            {% if user.phone %}
+                            <div class="text-nowrap">
+                                <i class="fas fa-phone text-muted me-1"></i>
+                                {{ user.phone }}
+                            </div>
+                            {% else %}
+                            <span class="text-muted">Não definido</span>
                             {% endif %}
                         </td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.phone }}</td>
                         <td>
-                            <span class="badge 
-                                {% if user.role == 'admin' %}bg-danger
-                                {% elif user.role == 'delivery_person' %}bg-info
+                            <span class="badge badge-modern 
+                                {% if user.role == 'ADMIN' %}bg-danger
+                                {% elif user.role == 'DELIVERY_PERSON' %}bg-info
                                 {% else %}bg-success{% endif %}">
-                                {{ user.role }}
+                                {% if user.role == 'ADMIN' %}
+                                <i class="fas fa-crown me-1"></i>Administrador
+                                {% elif user.role == 'DELIVERY_PERSON' %}
+                                <i class="fas fa-truck me-1"></i>Entregador
+                                {% else %}
+                                <i class="fas fa-user me-1"></i>Cliente
+                                {% endif %}
                             </span>
                         </td>
-                        <td>{{ user.created_at }}</td>
                         <td>
-                            <span class="badge bg-success">Ativo</span>
+                            <div class="text-nowrap">
+                                <small class="text-muted">{{ user.created_at|date:"d/m/Y" }}</small>
+                            </div>
+                            <div>
+                                <small class="text-muted">{{ user.created_at|date:"H:i" }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-success badge-modern">
+                                <i class="fas fa-check-circle me-1"></i>Ativo
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="viewUserDetails('{{ user.id }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-info" onclick="contactUser('{{ user.phone }}')">
+                                    <i class="fas fa-phone"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="editUser('{{ user.id }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -57,10 +202,90 @@
         </div>
         {% else %}
         <div class="text-center py-5">
-            <i class="fas fa-users fa-3x text-muted mb-3"></i>
-            <p class="text-muted">Nenhum usuário encontrado.</p>
+            <div class="mb-3">
+                <i class="fas fa-users fa-3x text-muted opacity-50"></i>
+            </div>
+            <h5 class="text-muted">Nenhum usuário encontrado</h5>
+            <p class="text-muted mb-0">Os usuários aparecerão aqui automaticamente</p>
         </div>
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Contar usuários por tipo
+    function countUsersByRole() {
+        const admins = document.querySelectorAll('.user-row[data-role="ADMIN"]').length;
+        const customers = document.querySelectorAll('.user-row[data-role="CUSTOMER"]').length;
+        const deliveryPersons = document.querySelectorAll('.user-row[data-role="DELIVERY_PERSON"]').length;
+        
+        document.getElementById('adminCount').textContent = admins;
+        document.getElementById('customerCount').textContent = customers;
+        document.getElementById('deliveryCount').textContent = deliveryPersons;
+    }
+    
+    // Filtrar usuários
+    function filterUsers() {
+        const searchText = document.getElementById('userSearch').value.toLowerCase();
+        const roleFilter = document.getElementById('roleFilter').value;
+        
+        const rows = document.querySelectorAll('.user-row');
+        
+        rows.forEach(row => {
+            const userName = row.querySelector('.fw-semibold').textContent.toLowerCase();
+            const userEmail = row.querySelector('.text-muted').textContent.toLowerCase();
+            const role = row.getAttribute('data-role');
+            
+            let show = true;
+            
+            // Filtro de busca
+            if (searchText && !userName.includes(searchText) && !userEmail.includes(searchText)) {
+                show = false;
+            }
+            
+            // Filtro de tipo
+            if (roleFilter && role !== roleFilter) {
+                show = false;
+            }
+            
+            row.style.display = show ? '' : 'none';
+        });
+    }
+    
+    // Funções auxiliares
+    function viewUserDetails(userId) {
+        alert(`Detalhes do usuário ${userId}\n\nEsta funcionalidade será implementada em breve.`);
+    }
+    
+    function contactUser(phone) {
+        if (phone && phone !== 'Não definido') {
+            window.open(`tel:${phone}`, '_self');
+        } else {
+            alert('Número de telefone não disponível');
+        }
+    }
+    
+    function editUser(userId) {
+        alert(`Editar usuário ${userId}\n\nEsta funcionalidade será implementada em breve.`);
+    }
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        countUsersByRole();
+        
+        // Busca em tempo real
+        document.getElementById('userSearch').addEventListener('input', filterUsers);
+        document.getElementById('roleFilter').addEventListener('change', filterUsers);
+    });
+</script>
+
+<style>
+    .avatar-lg {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+</style>
 {% endblock %}

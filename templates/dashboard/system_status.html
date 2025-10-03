@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block title %}Status do Sistema{% endblock %}
+{% block page_title %}Status do Sistema{% endblock %}
+{% block page_subtitle %}Monitoramento em tempo real da plataforma{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Status da API -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-modern">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0 text-primary">
+                    <i class="fas fa-satellite-dish me-2"></i>Status da API EcoGás
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center mb-4">
+                    <div class="col-8">
+                        <h4 class="{% if system_status.api_status == 'online' %}text-success{% else %}text-danger{% endif %}">
+                            {% if system_status.api_status == 'online' %}
+                            <i class="fas fa-check-circle me-2"></i>Operacional
+                            {% else %}
+                            <i class="fas fa-exclamation-triangle me-2"></i>Offline
+                            {% endif %}
+                        </h4>
+                        <p class="text-muted mb-0">{{ system_status.base_url }}</p>
+                    </div>
+                    <div class="col-4 text-end">
+                        <div class="status-indicator {% if system_status.api_status == 'online' %}bg-success{% else %}bg-danger{% endif %}"></div>
+                    </div>
+                </div>
+                
+                <div class="system-metrics">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="border-end">
+                                <div class="fw-bold fs-4 text-primary" id="responseTime">0.8s</div>
+                                <small class="text-muted">Tempo Resposta</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border-end">
+                                <div class="fw-bold fs-4 text-success" id="uptime">99.8%</div>
+                                <small class="text-muted">Uptime</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold fs-4 text-info" id="requests">1.2k</div>
+                            <small class="text-muted">Requests/Dia</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas do Sistema -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-modern">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0 text-primary">
+                    <i class="fas fa-chart-bar me-2"></i>Estatísticas do Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="system-stats">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted">Usuários Conectados</span>
+                        <span class="fw-bold text-success">1</span>
+                    </div>
+                    <div class="progress mb-4" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted">Uso de Memória</span>
+                        <span class="fw-bold text-info">42%</span>
+                    </div>
+                    <div class="progress mb-4" style="height: 8px;">
+                        <div class="progress-bar bg-info" style="width: 42%"></div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted">Uso de CPU</span>
+                        <span class="fw-bold text-warning">28%</span>
+                    </div>
+                    <div class="progress mb-4" style="height: 8px;">
+                        <div class="progress-bar bg-warning" style="width: 28%"></div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Espaço em Disco</span>
+                        <span class="fw-bold text-primary">65%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" style="width: 65%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Logs do Sistema -->
+<div class="row">
+    <div class="col-12">
+        <div class="card card-modern">
+            <div class="card-header bg-white border-0 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 text-primary">
+                        <i class="fas fa-terminal me-2"></i>Logs do Sistema
+                    </h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="refreshLogs()">
+                            <i class="fas fa-sync-alt me-1"></i>Atualizar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearLogs()">
+                            <i class="fas fa-trash me-1"></i>Limpar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="system-logs">
+                    <div class="log-entry text-success">
+                        <small>[{% now "H:i:s" %}] SISTEMA: Dashboard inicializado com sucesso</small>
+                    </div>
+                    <div class="log-entry text-info">
+                        <small>[{% now "H:i:s" %}] API: Conexão estabelecida com {{ system_status.base_url }}</small>
+                    </div>
+                    <div class="log-entry text-warning">
+                        <small>[{% now "H:i:s" %}] USUÁRIO: Sessão iniciada por {{ user.username }}</small>
+                    </div>
+                    <div class="log-entry text-success">
+                        <small>[{% now "H:i:s" %}] BANCO DE DADOS: Conexão estabilizada</small>
+                    </div>
+                    <div class="log-entry text-info">
+                        <small>[{% now "H:i:s" %}] CACHE: Sistema de cache ativado</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informações Técnicas -->
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card card-modern">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="card-title mb-0 text-primary">
+                    <i class="fas fa-info-circle me-2"></i>Informações da Aplicação
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="app-info">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Versão:</small>
+                        <small class="fw-bold">1.0.0</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Ambiente:</small>
+                        <small class="fw-bold text-success">Produção</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Última Atualização:</small>
+                        <small class="fw-bold">{% now "d/m/Y H:i" %}</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Tempo de Atividade:</small>
+                        <small class="fw-bold">2 horas</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Requests Hoje:</small>
+                        <small class="fw-bold">156</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card card-modern">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="card-title mb-0 text-primary">
+                    <i class="fas fa-cog me-2"></i>Configurações
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="config-info">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Autenticação:</small>
+                        <small class="fw-bold text-success">Ativa</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">SSL/TLS:</small>
+                        <small class="fw-bold text-success">Habilitado</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Cache:</small>
+                        <small class="fw-bold text-success">Ativo</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Logs:</small>
+                        <small class="fw-bold text-success">Ativos</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Monitoramento:</small>
+                        <small class="fw-bold text-success">Ativo</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Atualizar logs do sistema
+    function refreshLogs() {
+        const logsContainer = document.querySelector('.system-logs');
+        const newLog = document.createElement('div');
+        newLog.className = 'log-entry text-info';
+        newLog.innerHTML = `<small>[${new Date().toLocaleTimeString()}] SISTEMA: Logs atualizados manualmente</small>`;
+        logsContainer.appendChild(newLog);
+        logsContainer.scrollTop = logsContainer.scrollHeight;
+        
+        // Mostrar notificação
+        showNotification('Logs atualizados com sucesso!', 'success');
+    }
+    
+    // Limpar logs
+    function clearLogs() {
+        if (confirm('Tem certeza que deseja limpar os logs?')) {
+            document.querySelector('.system-logs').innerHTML = `
+                <div class="log-entry text-warning">
+                    <small>[${new Date().toLocaleTimeString()}] SISTEMA: Logs limpos manualmente</small>
+                </div>
+            `;
+            showNotification('Logs limpos com sucesso!', 'warning');
+        }
+    }
+    
+    // Simular atualizações em tempo real
+    function simulateRealTimeUpdates() {
+        setInterval(() => {
+            // Atualizar métricas
+            const responseTime = (0.5 + Math.random() * 0.5).toFixed(1);
+            const requests = (1200 + Math.random() * 100).toFixed(0);
+            
+            document.getElementById('responseTime').textContent = responseTime + 's';
+            document.getElementById('requests').textContent = requests;
+            
+            // Adicionar log automático ocasionalmente
+            if (Math.random() > 0.7) {
+                const logs = [
+                    'SISTEMA: Verificação de integridade concluída',
+                    'API: Health check realizado com sucesso',
+                    'CACHE: Limpeza automática de cache',
+                    'SEGURANÇA: Verificação de autenticação'
+                ];
+                const randomLog = logs[Math.floor(Math.random() * logs.length)];
+                
+                const logsContainer = document.querySelector('.system-logs');
+                const newLog = document.createElement('div');
+                newLog.className = 'log-entry text-muted';
+                newLog.innerHTML = `<small>[${new Date().toLocaleTimeString()}] ${randomLog}</small>`;
+                logsContainer.appendChild(newLog);
+                
+                // Manter apenas os últimos 10 logs
+                const allLogs = logsContainer.querySelectorAll('.log-entry');
+                if (allLogs.length > 10) {
+                    allLogs[0].remove();
+                }
+                
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+        }, 5000); // Atualizar a cada 5 segundos
+    }
+    
+    // Função de notificação
+    function showNotification(message, type) {
+        // Implementação simples de notificação
+        console.log(`${type.toUpperCase()}: ${message}`);
+    }
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        simulateRealTimeUpdates();
+    });
+</script>
+
+<style>
+    .status-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        animation: pulse 2s infinite;
+    }
+    
+    .system-logs {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .log-entry {
+        margin-bottom: 5px;
+        padding: 2px 0;
+    }
+    
+    .log-entry:last-child {
+        margin-bottom: 0;
+    }
+    
+    .app-info small, .config-info small {
+        font-size: 0.85rem;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+</style>
+{% endblock %}

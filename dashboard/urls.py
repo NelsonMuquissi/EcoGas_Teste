@@ -10,6 +10,6 @@ urlpatterns = [
     path('users/', views.users_view, name='users'),
     path('deliveries/', views.deliveries_view, name='deliveries'),
     path('products/', views.products_view, name='products'),
-    path('api/update-order-status/<int:order_id>/', views.update_order_status, name='update_order_status'),
+    path('api/update-order-status/<str:order_id>/', views.update_order_status, name='update_order_status'),
     path('system-status/', views.system_status_view, name='system_status'),
 ]

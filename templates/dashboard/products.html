@@ -1,62 +1,351 @@
 {% extends 'base.html' %}
 
 {% block title %}Produtos{% endblock %}
-{% block page_title %}Gestão de Produtos{% endblock %}
+{% block page_title %}Catálogo de Produtos{% endblock %}
+{% block page_subtitle %}Gerencie produtos e estoque{% endblock %}
 
 {% block content %}
-<div class="card shadow">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h6 class="m-0 font-weight-bold text-primary">
-            <i class="fas fa-gas-pump me-2"></i>Catálogo de Produtos
-        </h6>
-        <span class="badge bg-primary">{{ products|length }} produtos</span>
-    </div>
-    <div class="card-body">
-        {% if products %}
-        <div class="row">
-            {% for product in products %}
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 border">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h5 class="card-title text-primary">{{ product.name }}</h5>
-                            <span class="badge bg-success">Akz {{ product.price }}</span>
+<!-- Estatísticas de Produtos -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card text-white bg-primary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-white text-uppercase mb-1">
+                            Total de Produtos
                         </div>
-                        <p class="card-text text-muted small">{{ product.description }}</p>
-                        
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between text-sm">
-                                <span class="text-muted">
-                                    <i class="fas fa-box me-1"></i>
-                                    Stock: <strong>{{ product.stock }}</strong>
-                                </span>
-                                <span class="text-muted">
-                                    <i class="fas fa-tag me-1"></i>
-                                    {{ product.category }}
-                                </span>
+                        <div class="h2 mb-0 fw-bold" id="total-products">{{ products|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-boxes fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card text-white bg-success">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-white text-uppercase mb-1">
+                            Em Stock
+                        </div>
+                        <div class="h2 mb-0 fw-bold" id="total-stock">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-warehouse fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card text-white bg-warning">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-white text-uppercase mb-1">
+                            Baixo Stock
+                        </div>
+                        <div class="h2 mb-0 fw-bold" id="low-stock-count">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card text-white bg-info">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-white text-uppercase mb-1">
+                            Valor Total
+                        </div>
+                        <div class="h2 mb-0 fw-bold" id="total-value">Akz 0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-money-bill-wave fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ações Rápidas -->
+<div class="card card-modern mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Buscar produtos..." id="product-search">
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="category-filter">
+                    <option value="">Todas as categorias</option>
+                    <option value="GAS">Gás</option>
+                    <option value="ACCESSORY">Acessórios</option>
+                    <option value="EQUIPMENT">Equipamentos</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" onclick="addNewProduct()">
+                    <i class="fas fa-plus me-1"></i>Novo Produto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grid de Produtos -->
+<div class="row" id="products-grid">
+    {% for product in products %}
+    <div class="col-xl-4 col-lg-6 mb-4 product-card" data-category="{{ product.type }}" data-stock="{{ product.stock_quantity }}">
+        <div class="card card-modern h-100 product-item">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="card-title text-primary mb-1">{{ product.name }}</h5>
+                        <p class="text-muted small mb-0">{{ product.type }}</p>
+                    </div>
+                    <span class="badge bg-success badge-modern">
+                        Akz {{ product.price }}
+                    </span>
+                </div>
+                
+                <p class="card-text text-muted small mb-3">
+                    {{ product.description|default:"Sem descrição disponível"|truncatechars:100 }}
+                </p>
+                
+                <div class="product-meta">
+                    <div class="row text-center g-2 mb-3">
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <div class="fw-bold text-primary fs-5">{{ product.stock_quantity }}</div>
+                                <small class="text-muted">Em Stock</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <div class="fw-bold text-warning fs-5">{{ product.weight|default:"N/A" }}</div>
+                                <small class="text-muted">Peso</small>
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer bg-transparent">
-                        <div class="btn-group w-100">
-                            <button class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-edit me-1"></i>Editar
-                            </button>
-                            <button class="btn btn-outline-success btn-sm">
-                                <i class="fas fa-cube me-1"></i>Stock
-                            </button>
+                </div>
+                
+                <!-- Indicador de Stock -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <small class="text-muted">Nível de Stock</small>
+                        <small class="fw-bold 
+                            {% if product.stock_quantity > 20 %}text-success
+                            {% elif product.stock_quantity > 10 %}text-warning
+                            {% else %}text-danger{% endif %}">
+                            {% if product.stock_quantity > 20 %}Alto
+                            {% elif product.stock_quantity > 10 %}Médio
+                            {% else %}Baixo{% endif %}
+                        </small>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar 
+                            {% if product.stock_quantity > 20 %}bg-success
+                            {% elif product.stock_quantity > 10 %}bg-warning
+                            {% else %}bg-danger{% endif %}" 
+                            style="width: {% widthratio product.stock_quantity 50 100 %}%">
                         </div>
                     </div>
                 </div>
             </div>
-            {% endfor %}
+            
+            <div class="card-footer bg-transparent border-0 pt-0">
+                <div class="btn-group w-100 flex-column flex-md-row">
+                    <button class="btn btn-outline-primary btn-sm mb-2 mb-md-0" onclick="editProduct('{{ product.id }}')">
+                        <i class="fas fa-edit me-1"></i>Editar
+                    </button>
+                    <button class="btn btn-outline-success btn-sm mb-2 mb-md-0" onclick="manageStock('{{ product.id }}')">
+                        <i class="fas fa-warehouse me-1"></i>Stock
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="viewProductDetails('{{ product.id }}')">
+                        <i class="fas fa-chart-bar me-1"></i>Estatísticas
+                    </button>
+                </div>
+            </div>
         </div>
-        {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-gas-pump fa-3x text-muted mb-3"></i>
-            <p class="text-muted">Nenhum produto cadastrado.</p>
-        </div>
-        {% endif %}
     </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card card-modern">
+            <div class="card-body text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-gas-pump fa-3x text-muted opacity-50"></i>
+                </div>
+                <h5 class="text-muted">Nenhum produto encontrado</h5>
+                <p class="text-muted mb-0">Adicione produtos para começar</p>
+                <button class="btn btn-primary mt-3" onclick="addNewProduct()">
+                    <i class="fas fa-plus me-1"></i>Adicionar Primeiro Produto
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Calcular estatísticas de produtos - CORRIGIDO
+    function calculateProductStats() {
+        let totalStock = 0;
+        let totalValue = 0;
+        let lowStockCount = 0;
+        
+        document.querySelectorAll('.product-card').forEach(card => {
+            const stock = parseInt(card.getAttribute('data-stock')) || 0;
+            const priceElement = card.querySelector('.badge');
+            let price = 0;
+            
+            if (priceElement) {
+                const priceText = priceElement.textContent.replace('Akz ', '').trim();
+                price = parseFloat(priceText) || 0;
+            }
+            
+            totalStock += stock;
+            totalValue += stock * price;
+            
+            if (stock < 10) {
+                lowStockCount++;
+            }
+        });
+        
+        document.getElementById('total-stock').textContent = totalStock;
+        document.getElementById('total-value').textContent = 'Akz ' + totalValue.toLocaleString('pt-PT');
+        document.getElementById('low-stock-count').textContent = lowStockCount;
+    }
+    
+    // Filtrar produtos - CORRIGIDO
+    function filterProducts() {
+        const searchText = document.getElementById('product-search').value.toLowerCase();
+        const categoryFilter = document.getElementById('category-filter').value;
+        
+        document.querySelectorAll('.product-card').forEach(card => {
+            const productName = card.querySelector('.card-title').textContent.toLowerCase();
+            const productCategory = card.getAttribute('data-category');
+            
+            let show = true;
+            
+            if (searchText && !productName.includes(searchText)) {
+                show = false;
+            }
+            
+            if (categoryFilter && productCategory !== categoryFilter) {
+                show = false;
+            }
+            
+            card.style.display = show ? 'block' : 'none';
+        });
+    }
+    
+    // Funções auxiliares
+    function addNewProduct() {
+        showNotification('Adicionar novo produto - Funcionalidade em desenvolvimento', 'info');
+    }
+    
+    function editProduct(productId) {
+        showNotification('Editar produto ' + productId + ' - Funcionalidade em desenvolvimento', 'info');
+    }
+    
+    function manageStock(productId) {
+        showNotification('Gerir stock do produto ' + productId + ' - Funcionalidade em desenvolvimento', 'info');
+    }
+    
+    function viewProductDetails(productId) {
+        showNotification('Estatísticas do produto ' + productId + ' - Funcionalidade em desenvolvimento', 'info');
+    }
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        calculateProductStats();
+        
+        document.getElementById('product-search').addEventListener('input', filterProducts);
+        document.getElementById('category-filter').addEventListener('change', filterProducts);
+    });
+</script>
+
+<style>
+    .product-item {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .product-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .product-meta .border {
+        border-color: #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .product-meta .border:hover {
+        border-color: #f2b303;
+        background-color: rgba(242, 179, 3, 0.05);
+    }
+    
+    /* Progress Bar Corrigida */
+    .progress {
+        height: 6px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.6s ease;
+    }
+    
+    /* Responsividade para produtos */
+    @media (max-width: 1200px) {
+        .col-xl-4 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .col-xl-4, .col-lg-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        
+        .btn-group.w-100 {
+            flex-direction: column;
+        }
+        
+        .btn-group.w-100 .btn {
+            margin-bottom: 5px;
+            border-radius: 8px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .product-meta .row {
+            margin: 0 -5px;
+        }
+        
+        .product-meta .col-6 {
+            padding: 0 5px;
+        }
+    }
+</style>
 {% endblock %}
